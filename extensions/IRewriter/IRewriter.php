@@ -49,7 +49,26 @@ class IRewriter {
     private $_altKey = false;
     private $_shiftKey = false;
     private $_metaKey = false;*/
-    private $_settings = array();
+    private $_settings = array(
+        'shortcut' => array(
+            'controlkey' => false,
+            'altkey' => false,
+            'shiftkey' => false,
+            'metakey' => false,
+            'key' => 'M'
+        ),
+        'checkbox' => array(
+            'text' => '',
+            'link' => array(
+                'href' => '',
+                'tooltip' => ''
+            ),
+        ),
+        'default_state' => true,
+        'schemes' => array(),
+        'default_scheme_index' => 0,
+        'enabled' => true
+    );
 
     private $_supportedSkins = array('Vector', 'Monobook');
 
@@ -61,7 +80,7 @@ class IRewriter {
     }
 
     public function setSettings($settings) {
-        $this->_settings = $settings;
+        $this->_settings = array_merge_recursive($this->_settings, $settings);
     }
 
     /**
@@ -84,9 +103,10 @@ class IRewriter {
      *
      * @param string $scheme
      */
+    /*
     public function addScheme($scheme) {
         $this->_schemes[] = $scheme;
-    }
+    }*/
 
     /**
      * Hook function for the event 'BeforePageDisplay'
@@ -94,50 +114,65 @@ class IRewriter {
      * @param Skin $sk 
      */
     public function onBeforePageDisplay(&$out, &$sk) {
-        global $wgStylePath;
+        global $wgStylePath, $wgJsMimeType, $wgScriptPath;
         // add script tag for each scheme
-        foreach ($this->_schemes as $scheme) {
-            $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".dirname(__FILE__)."/{$scheme}_rules.js\"></script>\n");
+        foreach ($this->_settings['schemes'] as $scheme) {
+            $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".$wgScriptPath."/extensions/IRewriter/{$scheme}_rules.js\"></script>\n");
         }
 
         # Register tool js file for IRewriter
-        $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".dirname(__FILE__)."/IRewriter.js\"></script>\n");
+        $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".$wgScriptPath."/extensions/IRewriter/IRewriter.js\"></script>\n");
 
         $scriptTag = '<script type="'.$wgJsMimeType.'">'.$this->getInitJSCode($sk->getSkinName()).'</script>';
+        $out->addScript($scriptTag);
         return true;
     }
 
     private function getInitJSCode($skinName) {
         
-	$settings =    'IRewriter.shortcut = {';
-        $settings +=        'controlkey: '.$this->_settings['shortcut']['controlkey'].',';
-	$settings +=        'altkey: '.$this->_settings['shortcut']['altkey'].',';
-	$settings +=        'shiftkey: '.$this->_settings['shortcut']['shiftkey'].',';
-	$settings +=        'metakey: '.$this->_settings['shortcut']['metakey'].',';
-	$settings +=        'key: '.$this->_settings['shortcut']['key'].',';
-	$settings +=    '};\n';
-	$settings +=    'IRewriter.checkbox = {';
-	$settings +=        'text: \'To toggle (\'+ IRewriter.shortcut.toString()+ \')\' \''.$this->_settings['checkbox']['text'].'\' ,';
-	$settings +=        'link: {';
-	$settings +=            'href: \'http://ml.wikipedia.org/wiki/Help:Typing\',';
-	$settings +=            'tooltip = \'To write Malayalam use this tool, shortcut: (\'+ IRewriter.shortcut.toString()+ \')\',';
-	$settings +=        '},';
-	$settings +=    '};\n';
-	$settings +=    'IRewriter.default_state = true;\n';
-	$settings +=    'IRewriter.schemes = [';
-        $schemeCount = count($this->_settings);
+	$settings =    "IRewriter.shortcut = {\n";
+        $settings .=        "controlkey: ".  IRewriter::boolToString($this->_settings['shortcut']['controlkey']).",\n";
+	$settings .=        "altkey: ".IRewriter::boolToString($this->_settings['shortcut']['altkey']).",\n";
+	$settings .=        "shiftkey: ".IRewriter::boolToString($this->_settings['shortcut']['shiftkey']).",\n";
+	$settings .=        "metakey: ".IRewriter::boolToString($this->_settings['shortcut']['metakey']).",\n";
+	$settings .=        "key: ".$this->_settings['shortcut']['key'].",\n";
+	$settings .=    "};\n";
+	$settings .=    "IRewriter.checkbox = {\n";
+	$settings .=        "text: '".$this->_settings['checkbox']['text']." ('+IRewriter.shortcut.toString()+')',\n";
+	$settings .=        "href: '".$this->_settings['checkbox']['href']."',\n";
+	$settings .=        "tooltip: '".$this->_settings['checkbox']['tooltip']."',\n";
+	$settings .=    "};\n";
+	$settings .=    'IRewriter.default_state = '.IRewriter::boolToString($this->_settings['default_state']).";\n";
+	$settings .=    "IRewriter.schemes = [\n";
+        $schemeCount = count($this->_settings['schemes']);
         for($i =0; $i < $schemeCount; $i++) {
-            $settings += $this->_settings['schemes'];
+            $settings .= 'tr_'.$this->_settings['schemes'][$i];
             if($i < ($schemeCount-1)) {
-                $settings += ', ';
+                $settings .= ', ';
             }
         }
-        $settings += '];\n';
-	$settings += 'IRewriter.default_scheme_index= '.$this->_settings['default_scheme_index'].',';
-	$settings +=    'IRewriter.enabled = '.$this->_settings['enabled'].'\n';
+        $settings .= "];\n";
+	$settings .= "IRewriter.default_scheme_index = ".$this->_settings['default_scheme_index'].";\n";
+	$settings .= 'IRewriter.enabled = '.IRewriter::boolToString($this->_settings['enabled']).";\n";
+
+        $settings .= "function irSetup() {\n";
+	$settings .= "inputRewrite('input');\n";
+	$settings .= "inputRewrite('textarea');\n";
+        $settings .= "IRewriter.init();\n";
         if(in_array($skinName, $this->_supportedSkins)) {
-            $settings += 'setupIRewriterFor'.$skinName.'();\n';
+            $settings .= 'setupIRewriterFor'.$skinName."();\n";
         }
+        $settings .= "}\n";
+        $settings .= "if (window.addEventListener){\n";
+	$settings .= "window.addEventListener('load', irSetup, false);\n";
+        $settings .= "} else if (window.attachEvent){\n";
+	$settings .= "window.attachEvent('onload', irSetup);\n";
+        $settings .= "}";
+        return $settings;
+    }
+
+    public static function  boolToString($value) {
+        return ($value) ? 'true' : 'false';
     }
 }
 
