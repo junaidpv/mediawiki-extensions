@@ -42,18 +42,26 @@ $wgExtensionCredits['other'][] = array(
  */
 class IRewriter {
     private static $_instance;
+    /*
     private $_schemes=array();
     private $_shortcutKey = 'M';
     private $_controlKey = true;
     private $_altKey = false;
     private $_shiftKey = false;
-    private $_metaKey = false;
+    private $_metaKey = false;*/
+    private $_settings = array();
+
+    private $_supportedSkins = array('Vector', 'Monobook');
 
     /**
      * implemtns singleten pattern so direct object creation is prevented.
      */
     private function __construct() {
         
+    }
+
+    public function setSettings($settings) {
+        $this->_settings = $settings;
     }
 
     /**
@@ -94,25 +102,42 @@ class IRewriter {
 
         # Register tool js file for IRewriter
         $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".dirname(__FILE__)."/IRewriter.js\"></script>\n");
+
+        $scriptTag = '<script type="'.$wgJsMimeType.'">'.$this->getInitJSCode($sk->getSkinName()).'</script>';
         return true;
     }
 
-    /**
-     * Support for vector skin
-     */
-    private function addScriptTagForVectorSkin(){
-        $scriptTag = '<script type="text/javascript">';
-        $scriptTag += 'function transetup(event) {';
-        foreach ($this->_schemes as $scheme) {
-            $scriptTag += 'transettings.push(tr_'.$scheme.');';
-        }
-        $scriptTag += 'transettings.shortcut.key = "'.$this->_shortcutKey.'";';
-        $scriptTag += 'transettings.shortcut.controlkey = "'.$this->_controlKey.'";';
-        $scriptTag += 'transettings.shortcut.shiftkey = "'.$this->_shiftKey.'";';
-        $scriptTag += 'transettings.shortcut.altkey = "'.$this->_altKey.'";';
-        $scriptTag += 'transettings.shortcut.metakey = "'.$this->_metaKey.'";';
-        $scriptTag += 'transettings.shortcut.checkbox = "'.$this->_metaKey.'";';
+    private function getInitJSCode($skinName) {
         
+	$settings =    'IRewriter.shortcut = {';
+        $settings +=        'controlkey: '.$this->_settings['shortcut']['controlkey'].',';
+	$settings +=        'altkey: '.$this->_settings['shortcut']['altkey'].',';
+	$settings +=        'shiftkey: '.$this->_settings['shortcut']['shiftkey'].',';
+	$settings +=        'metakey: '.$this->_settings['shortcut']['metakey'].',';
+	$settings +=        'key: '.$this->_settings['shortcut']['key'].',';
+	$settings +=    '};\n';
+	$settings +=    'IRewriter.checkbox = {';
+	$settings +=        'text: \'To toggle (\'+ IRewriter.shortcut.toString()+ \')\' \''.$this->_settings['checkbox']['text'].'\' ,';
+	$settings +=        'link: {';
+	$settings +=            'href: \'http://ml.wikipedia.org/wiki/Help:Typing\',';
+	$settings +=            'tooltip = \'To write Malayalam use this tool, shortcut: (\'+ IRewriter.shortcut.toString()+ \')\',';
+	$settings +=        '},';
+	$settings +=    '};\n';
+	$settings +=    'IRewriter.default_state = true;\n';
+	$settings +=    'IRewriter.schemes = [';
+        $schemeCount = count($this->_settings);
+        for($i =0; $i < $schemeCount; $i++) {
+            $settings += $this->_settings['schemes'];
+            if($i < ($schemeCount-1)) {
+                $settings += ', ';
+            }
+        }
+        $settings += '];\n';
+	$settings += 'IRewriter.default_scheme_index= '.$this->_settings['default_scheme_index'].',';
+	$settings +=    'IRewriter.enabled = '.$this->_settings['enabled'].'\n';
+        if(in_array($skinName, $this->_supportedSkins)) {
+            $settings += 'setupIRewriterFor'.$skinName.'();\n';
+        }
     }
 }
 
