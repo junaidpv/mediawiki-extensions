@@ -8,6 +8,8 @@
  * License: GPLv3, CC-BY-SA 3.0
  */
 
+var IRewriter = {};
+
 /**
  * from: http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
  */
@@ -321,8 +323,8 @@ function tiKeyDown(event) {
  * This is the function to which call during window load event for trasliterating textfields.
  * The funtion will accept any number of HTML tag IDs of textfields.
 */
-function transliterate(tagName) {
-	var elements = document.getElementaByTagName(tagName);
+function inputRewrite(tagName) {
+	var elements = document.getElementsByTagName(tagName);
 	var len = elements.length;
 	for(var i=0;i<len; i++)
 	{
@@ -395,7 +397,6 @@ function writingStyleLBChanged(event) {
 }
 
 // IRewriter setup and initialization code
-var IRewriter = {};
 IRewriter.shortcut = {};
 IRewriter.checkbox = {};
 IRewriter.checkbox.link = {};
@@ -415,13 +416,10 @@ IRewriter.shortcut.toString = function() {
 	parts.push(this.key.toUpperCase());
 	return parts.join('+');
 }
-
-IRewriter.initMultiSchemeIndex = function(index) {
-	if(isNaN(index)) index = parseInt(index);
-	if(index==null || index==undefined || index=='' || index < 0) IRewriter.default_scheme_index = 0;
-	else IRewriter.default_scheme_index = index;
+/*
+IRewriter.initMultiSchemeIndex = function() {
 	IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
-}
+}*/
 
 /**
  * This functions is to synchronize IRewriter state from cookie
@@ -443,10 +441,8 @@ IRewriter.shortcut = {
 };
 IRewriter.checkbox = {
 	text: '', // eg: 'To toggle ('+ IRewriter.shortcut.toString()+ ')'
-	link: {
-		href: '', // eg: 'http://ml.wikipedia.org/wiki/Help:Typing'
-		tooltip: '' // eg: 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')'
-	}
+	href: '', // eg: 'http://ml.wikipedia.org/wiki/Help:Typing'
+	tooltip: '' // eg: 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')'
 };
 IRewriter.default_state = true;
 IRewriter.schemes =  []; // eg: [tr_ml, tr_ml_inscript]
@@ -457,41 +453,8 @@ IRewriter.check_str_length = 6;
 // temporary disabling of transliteration
 //IRewriter.temp_disable = !IRewriter.enabled;
 
-/*
-Example for Mandatory
-var settings = {
-	schemes: new Array(tr_ml),
-
-};
-
-Example usage for wikipedia
-
-var settings = {
-	shortcut: {
-		controlkey: true,
-		altkey: false,
-		shiftkey: false,
-		metakey: false,
-		key: 'M',
-		},
-	checkbox: {
-		text: 'To toggle ('+ IRewriter.shortcut.toString()+ ')',
-		link: {
-			href: 'http://ml.wikipedia.org/wiki/Help:Typing',
-			tooltip = 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')',
-		},
-	},
-	default_state: true,
-	schemes: [tr_ml, tr_ml_inscript],
-	default_scheme_index: 1,
-	enabled: true,
-};
-
-then call
-IRewriter.init(settings);
-*/
-IRewriter.init(settings) {
-	this.initMultiSchemeIndex(settings.default_scheme_index);
+IRewriter.init = function() {
+	IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
 	this.translitStateSynWithCookie();
 }
 
@@ -526,8 +489,8 @@ IRewriter.getCheckBoxWithLabel = function() {
 
 	var label = document.createElement('label');
 	var linktohelp = document.createElement ('a');
-	linktohelp.href= IRewriter.checkbox.link.href;
-	linktohelp.title= IRewriter.checkbox.link.tooltip;
+	linktohelp.href= IRewriter.checkbox.href;
+	linktohelp.title= IRewriter.checkbox.tooltip;
 	linktohelp.appendChild( document.createTextNode(IRewriter.checkbox.text) );
 	label.appendChild(linktohelp);
 
@@ -542,7 +505,10 @@ IRewriter.getCheckBoxWithLabel = function() {
 function setupIRewriterForVector() {
 	var listBox = IRewriter.getMultiSchemeListBox();
 	var checkBoxWithLabel = IRewriter.getCheckBoxWithLabel();
+        var div = document.createElement("div");
+        div.appendChild(listBox);
+        div.appendChild(checkBoxWithLabel);
 	var container = document.getElementById('p-search');
 	var searchform = document.getElementById('searchform');
-	container.insertBefore(transListBox,searchform);
+	container.insertBefore(div,searchform);
 }
