@@ -27,10 +27,34 @@ if(!defined('MEDIAWIKI')) {
 $wgExtensionCredits['other'][] = array(
 	'name' => 'IRewriter',
 	'version' => 0.1,
-	'author' =>'Junaid P V',
+	'author' =>'Junaid P V (http://junaidpv.in)',
 	'url' => 'http://www.mediawiki.org/wiki/Extension:IRewriter',
-	'description' => 'Allow to implement custom input methods for input fields.'
+	'description' => 'Allows to add custom input methods for input fields.'
 );
+
+$wgIRewriterConfig = array(
+    'shortcut' => array(
+        'controlkey' => false,
+        'altkey' => false,
+        'shiftkey' => false,
+        'metakey' => false,
+        'key' => 'M'
+    ),
+    'checkbox' => array(
+        'text' => '',
+        'link' => array(
+            'href' => '',
+            'tooltip' => ''
+        ),
+    ),
+    'default_state' => true,
+    'schemes' => array(),
+    'default_scheme_index' => 0,
+    'enabled' => true
+);
+
+$wgExtensionMessagesFiles['IRewriter'] = dirname(__FILE__). '/IRewriter.i18n.php';
+
 
 /**
  * IRewriter class
@@ -70,6 +94,8 @@ class IRewriter {
         'enabled' => true
     );
 
+    private $_out;
+
     private $_supportedSkins = array('vector', 'monobook');
 
     /**
@@ -77,10 +103,6 @@ class IRewriter {
      */
     private function __construct() {
         
-    }
-
-    public function setSettings($settings) {
-        $this->_settings = array_merge($this->_settings, $settings);
     }
 
     /**
@@ -114,9 +136,10 @@ class IRewriter {
      * @param Skin $sk 
      */
     public function onBeforePageDisplay(&$out, &$sk) {
-        global $wgStylePath, $wgJsMimeType, $wgScriptPath;
+        global $wgStylePath, $wgJsMimeType, $wgScriptPath, $wgIRewriterConfig;
+        $this->_out = $out;
         // add script tag for each scheme
-        foreach ($this->_settings['schemes'] as $scheme) {
+        foreach ($wgIRewriterConfig['schemes'] as $scheme) {
             $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".$wgScriptPath."/extensions/IRewriter/{$scheme}_rules.js\"></script>\n");
         }
 
@@ -129,43 +152,49 @@ class IRewriter {
     }
 
     private function getInitJSCode($skinName) {
-        
-        $settings .=        "IRewriter.shortcut.controlkey= ".  IRewriter::boolToString($this->_settings['shortcut']['controlkey']).";\n";
-	$settings .=        "IRewriter.shortcut.altkey= ".IRewriter::boolToString($this->_settings['shortcut']['altkey']).";\n";
-	$settings .=        "IRewriter.shortcut.shiftkey= ".IRewriter::boolToString($this->_settings['shortcut']['shiftkey']).";\n";
-	$settings .=        "IRewriter.shortcut.metakey= ".IRewriter::boolToString($this->_settings['shortcut']['metakey']).";\n";
-	$settings .=        sprintf("IRewriter.shortcut.key= '%s'\n", $this->_settings['shortcut']['key']);
-	$settings .= sprintf("IRewriter.checkbox.text= '%s ('+IRewriter.shortcut.toString()+')';\n", $this->_settings['checkbox']['text']);
-	$settings .= sprintf("IRewriter.checkbox.href= '%s';\n", $this->_settings['checkbox']['href']);
-	$settings .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", $this->_settings['checkbox']['tooltip']);
-	$settings .=    'IRewriter.default_state = '.IRewriter::boolToString($this->_settings['default_state']).";\n";
-	$settings .=    "IRewriter.schemes = [\n";
-        $schemeCount = count($this->_settings['schemes']);
+        global $wgIRewriterConfig;
+        $shortcut = $wgIRewriterConfig['shortcut'];
+        $str = "IRewriter.shortcut.controlkey= ".IRewriter::boolToString($shortcut['controlkey']).";\n";
+	$str .= "IRewriter.shortcut.altkey= ".IRewriter::boolToString($shortcut['altkey']).";\n";
+	$str .= "IRewriter.shortcut.shiftkey= ".IRewriter::boolToString($shortcut['shiftkey']).";\n";
+	$str .= "IRewriter.shortcut.metakey= ".IRewriter::boolToString($shortcut['metakey']).";\n";
+	$str .= sprintf("IRewriter.shortcut.key= '%s';\n", $shortcut['key']);
+	$str .= sprintf("IRewriter.checkbox.text= '%s ('+IRewriter.shortcut.toString()+')';\n", wfMsg('irewriter-toggle-ime') /*$wgIRewriterConfig['checkbox']['text']*/);
+	$str .= sprintf("IRewriter.checkbox.href= '%s';\n", $wgIRewriterConfig['checkbox']['href']);
+	$str .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", $wgIRewriterConfig['checkbox']['tooltip']);
+	//$str .=    'IRewriter.default_state = '.IRewriter::boolToString($wgIRewriterConfig['default_state']).";\n";
+	$str .=    "IRewriter.schemes = [\n";
+        $schemeCount = count($wgIRewriterConfig['schemes']);
         for($i =0; $i < $schemeCount; $i++) {
-            $settings .= sprintf('tr_%s', $this->_settings['schemes'][$i]);
+            $str .= sprintf('tr_%s', $wgIRewriterConfig['schemes'][$i]);
             if($i < ($schemeCount-1)) {
-                $settings .= ', ';
+                $str .= ', ';
             }
         }
-        $settings .= "];\n";
-        $temp = $this->_settings['default_scheme_index'];
-	//$settings .= sprintf("IRewriter.default_scheme_index = %d;\n",$temp);
-	$settings .= 'IRewriter.enabled = '.IRewriter::boolToString($this->_settings['enabled']).";\n";
-
-        $settings .= "function irSetup() {\n";
-	$settings .= "inputRewrite('input');\n";
-	$settings .= "inputRewrite('textarea');\n";
-        $settings .= sprintf("IRewriter.init(%d);\n", $this->_settings['default_scheme_index']);
-        if(in_array($skinName, $this->_supportedSkins)) {
-            $settings .= 'setupIRewriterFor'.$skinName."();\n";
+        $str .= "];\n";
+        for($i =0; $i < $schemeCount; $i++) {
+            $str .= sprintf("tr_%s.text = '%s';\n", $wgIRewriterConfig['schemes'][$i], wfMsg('irewriter-'.str_replace('_', '-', $wgIRewriterConfig['schemes'][$i])) );
         }
-        $settings .= "}\n";
-        $settings .= "if (window.addEventListener){\n";
-	$settings .= "window.addEventListener('load', irSetup, false);\n";
-        $settings .= "} else if (window.attachEvent){\n";
-	$settings .= "window.attachEvent('onload', irSetup);\n";
-        $settings .= "}";
-        return $settings;
+
+
+        $temp = $wgIRewriterConfig['default_scheme_index'];
+	//$str .= sprintf("IRewriter.default_scheme_index = %d;\n",$temp);
+	$str .= 'IRewriter.enabled = '.IRewriter::boolToString($wgIRewriterConfig['enabled']).";\n";
+
+        $str .= "function irSetup() {\n";
+	$str .= "inputRewrite('input');\n";
+	$str .= "inputRewrite('textarea');\n";
+        $str .= sprintf("IRewriter.init(%d);\n", $wgIRewriterConfig['default_scheme_index']);
+        if(in_array($skinName, $this->_supportedSkins)) {
+            $str .= 'setupIRewriterFor'.$skinName."();\n";
+        }
+        $str .= "}\n";
+        $str .= "if (window.addEventListener){\n";
+	$str .= "window.addEventListener('load', irSetup, false);\n";
+        $str .= "} else if (window.attachEvent){\n";
+	$str .= "window.attachEvent('onload', irSetup);\n";
+        $str .= "}";
+        return $str;
     }
 
     public static function  boolToString($value) {

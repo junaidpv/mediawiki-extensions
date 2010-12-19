@@ -14,7 +14,8 @@ $messages = array();
  * @author Junaid P V
  */
 $messages['en'] = array(
-    'irewriter'         => 'IRewriter',
-    'irewriter-transliteration' => 'Transliteration',
-    'irewriter-inscript'  => 'InScript',
+    'irewriter-toggle-ime' => 'To toggle IM',
+    'irewriter-ml' => 'Malayalam Transliteration',
+    'irewriter-ml-inscript' => 'Malayalam InScript',
+    'irewriter-ta99' => 'Tamil99',
 );
