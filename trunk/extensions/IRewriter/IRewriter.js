@@ -185,8 +185,9 @@ IRewriter.enableTrasliteration = function(enable) {
 		enable = true;
 	}
 	var cookieValue;
+        IRewriter.enabled  = enable;
 	if(enable) {
-		IRewriter.enabled  = true;
+		
 		//IRewriter.temp_disable = false;
 		cookieValue = 1;
 	}
@@ -231,7 +232,7 @@ function shortKeyPressed(event) {
 		(shortcut.controlkey==controlKey && shortcut.shiftkey==shiftKey && shortcut.altkey==altKey && shortcut.metakey==metaKey) &&
 		String.fromCharCode(code).toLowerCase()==shortcut.key.toLowerCase())
 		{
-		IRewriter.enableTrasliteration(targetElement.id, !IRewriter.enabled );
+		IRewriter.enableTrasliteration(!IRewriter.enabled );
 		stopPropagation(e);
 		return false;
 	}
@@ -335,7 +336,7 @@ function inputRewrite(tagName) {
 		}
 		if(element)
 		{
-			IRewriter.enabled  = IRewriter.default_state;
+			//IRewriter.enabled  = IRewriter.default_state;
 			IRewriter.previous_sequence[element.id] = '';
 			if (element.addEventListener){
 				element.addEventListener('keydown', tiKeyDown, false);
@@ -399,7 +400,6 @@ function writingStyleLBChanged(event) {
 // IRewriter setup and initialization code
 IRewriter.shortcut = {};
 IRewriter.checkbox = {};
-IRewriter.checkbox.link = {};
 // memory for previus key sequence
 IRewriter.previous_sequence = {};
 
@@ -426,7 +426,7 @@ IRewriter.initMultiSchemeIndex = function() {
  */
 IRewriter.translitStateSynWithCookie = function() {
 	var state = parseInt(readCookie(IRewriter.prefix ));
-	var enable = IRewriter.default_state;
+	var enable = IRewriter.enabled;
 	if(state == 1)  enable=true;
 	else if(state==0) enable =false;
 	IRewriter.enableTrasliteration(enable);
@@ -437,14 +437,23 @@ IRewriter.shortcut = {
 	altkey: false,
 	shiftkey: false,
 	metakey: false,
-	key: ''	// eg: 'M'
+	key: '',	// eg: 'M'
+        toString: function() {
+            var parts= [];
+            if(IRewriter.shortcut.controlkey) parts.push('Ctrl');
+            if(IRewriter.shortcut.shiftkey) parts.push('Shift');
+            if(IRewriter.shortcut.altkey) parts.push('Alt');
+            if(IRewriter.shortcut.metakey) parts.push('Meta');
+            parts.push(IRewriter.shortcut.key.toUpperCase());
+            return parts.join('+');
+        }
 };
 IRewriter.checkbox = {
 	text: '', // eg: 'To toggle ('+ IRewriter.shortcut.toString()+ ')'
 	href: '', // eg: 'http://ml.wikipedia.org/wiki/Help:Typing'
 	tooltip: '' // eg: 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')'
 };
-IRewriter.default_state = true;
+//IRewriter.default_state = true;
 IRewriter.schemes =  []; // eg: [tr_ml, tr_ml_inscript]
 IRewriter.default_scheme_index = 0; // eg: 0
 IRewriter.enabled = true;
@@ -453,8 +462,8 @@ IRewriter.check_str_length = 6;
 // temporary disabling of transliteration
 //IRewriter.temp_disable = !IRewriter.enabled;
 
-IRewriter.init = function() {
-	IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
+IRewriter.init = function(index) {
+	IRewriter.current_scheme = IRewriter.schemes[index];
 	this.translitStateSynWithCookie();
 }
 
@@ -477,10 +486,11 @@ IRewriter.getMultiSchemeListBox = function() {
 
 IRewriter.getCheckBoxWithLabel = function() {
 	var checkbox = document.createElement("input");
+        IRewriter.checkbox.element = checkbox;
 	checkbox.type = "checkbox";
 	checkbox.id = this.prefix+'cb';
 	checkbox.value = 'searchInput'; // specifying curresponding input filed.
-	checkbox.checked = IRewriter.default_state;
+	checkbox.checked = IRewriter.enabled;
 
 	if (checkbox.addEventListener)
 		checkbox.addEventListener("click", transOptionOnClick, false);
@@ -502,13 +512,13 @@ IRewriter.getCheckBoxWithLabel = function() {
 	return div;
 }
 
-function setupIRewriterForVector() {
+function setupIRewriterForvector() {
 	var listBox = IRewriter.getMultiSchemeListBox();
 	var checkBoxWithLabel = IRewriter.getCheckBoxWithLabel();
-        var div = document.createElement("div");
-        div.appendChild(listBox);
-        div.appendChild(checkBoxWithLabel);
+        var span = document.createElement("span");
+        span.appendChild(listBox);
+        span.appendChild(checkBoxWithLabel);
 	var container = document.getElementById('p-search');
 	var searchform = document.getElementById('searchform');
-	container.insertBefore(div,searchform);
+	container.insertBefore(span,searchform);
 }
