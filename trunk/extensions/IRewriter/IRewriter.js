@@ -457,7 +457,7 @@ IRewriter.checkbox = {
 IRewriter.schemes =  []; // eg: [tr_ml, tr_ml_inscript]
 IRewriter.default_scheme_index = 0; // eg: 0
 IRewriter.enabled = true;
-IRewriter.prefix = 'irewriter-enabled';
+IRewriter.prefix = 'irewriter-';
 IRewriter.check_str_length = 6;
 // temporary disabling of transliteration
 //IRewriter.temp_disable = !IRewriter.enabled;
@@ -467,26 +467,24 @@ IRewriter.init = function(index) {
 	this.translitStateSynWithCookie();
 }
 
-IRewriter.getMultiSchemeListBox = function() {
-	var transListBox = document.createElement("select");
-	if (transListBox.addEventListener)
-		transListBox.addEventListener("change", writingStyleLBChanged, false);
-	else if (transListBox.attachEvent)
-		transListBox.attachEvent("onchange", writingStyleLBChanged);
+IRewriter.prepareMultiSchemeListBox = function() {
+	this.listBox = document.createElement("select");
+	if (this.listBox.addEventListener)
+		this.listBox.addEventListener("change", writingStyleLBChanged, false);
+	else if (this.listBox.attachEvent)
+		this.listBox.attachEvent("onchange", writingStyleLBChanged);
 	var numOfSchemes = IRewriter.schemes.length;
 	for(var i=0; i < numOfSchemes; i++) {
 		var schemeOption = document.createElement("option");
 		schemeOption.appendChild( document.createTextNode(IRewriter.schemes[i].text) );
 		schemeOption.value = IRewriter.schemes[i].text;
 		if(IRewriter.default_scheme_index==i) schemeOption.selected=true;
-		transListBox.appendChild( schemeOption );
+		this.listBox.appendChild( schemeOption );
 	}
-	return transListBox;
 }
 
-IRewriter.getCheckBoxWithLabel = function() {
+IRewriter.prepareCheckBoxWithLabel = function() {
 	var checkbox = document.createElement("input");
-        IRewriter.checkbox.element = checkbox;
 	checkbox.type = "checkbox";
 	checkbox.id = this.prefix+'cb';
 	checkbox.value = 'searchInput'; // specifying curresponding input filed.
@@ -499,25 +497,40 @@ IRewriter.getCheckBoxWithLabel = function() {
 
 	var label = document.createElement('label');
 	var linktohelp = document.createElement ('a');
-	linktohelp.href= IRewriter.checkbox.href;
-	linktohelp.title= IRewriter.checkbox.tooltip;
-	linktohelp.appendChild( document.createTextNode(IRewriter.checkbox.text) );
+	linktohelp.href= this.checkbox.href;
+	linktohelp.title= this.checkbox.tooltip;
+	linktohelp.appendChild( document.createTextNode(this.checkbox.text) );
 	label.appendChild(linktohelp);
 
-	var div = document.createElement('div');
-	div.style.padding = 0;
-	div.style.margin = 0;
-	div.appendChild(checkbox);
-	div.appendChild(label);
-	return div;
+	this.checkboxWL = document.createElement('span');
+	this.checkboxWL.style.padding = 0;
+        this.checkboxWL.id = this.prefix+'cbwl';
+	this.checkboxWL.style.margin = 0;
+	this.checkboxWL.appendChild(checkbox);
+	this.checkboxWL.appendChild(label);
 }
 
 function setupIRewriterForvector() {
-	var listBox = IRewriter.getMultiSchemeListBox();
-	var checkBoxWithLabel = IRewriter.getCheckBoxWithLabel();
+	IRewriter.prepareMultiSchemeListBox();
+	IRewriter.prepareCheckBoxWithLabel();
         var span = document.createElement("span");
-        span.appendChild(listBox);
-        span.appendChild(checkBoxWithLabel);
+        span.style.position = 'absolute';
+        span.style.marginTop = '-1em';
+        span.appendChild(IRewriter.listBox);
+        span.appendChild(IRewriter.checkboxWL);
+	var container = document.getElementById('p-search');
+	var searchform = document.getElementById('searchform');
+	container.insertBefore(span,searchform);
+}
+
+function setupIRewriterFormonobook() {
+	IRewriter.prepareMultiSchemeListBox();
+	IRewriter.prepareCheckBoxWithLabel();
+        var span = document.createElement("span");
+        span.style.position = 'absolute';
+        span.style.marginTop = '-1em';
+        span.appendChild(IRewriter.listBox);
+        span.appendChild(IRewriter.checkboxWL);
 	var container = document.getElementById('p-search');
 	var searchform = document.getElementById('searchform');
 	container.insertBefore(span,searchform);
