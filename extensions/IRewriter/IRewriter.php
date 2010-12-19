@@ -70,7 +70,7 @@ class IRewriter {
         'enabled' => true
     );
 
-    private $_supportedSkins = array('Vector', 'Monobook');
+    private $_supportedSkins = array('vector', 'monobook');
 
     /**
      * implemtns singleten pattern so direct object creation is prevented.
@@ -80,7 +80,7 @@ class IRewriter {
     }
 
     public function setSettings($settings) {
-        $this->_settings = array_merge_recursive($this->_settings, $settings);
+        $this->_settings = array_merge($this->_settings, $settings);
     }
 
     /**
@@ -130,35 +130,32 @@ class IRewriter {
 
     private function getInitJSCode($skinName) {
         
-	$settings =    "IRewriter.shortcut = {\n";
-        $settings .=        "controlkey: ".  IRewriter::boolToString($this->_settings['shortcut']['controlkey']).",\n";
-	$settings .=        "altkey: ".IRewriter::boolToString($this->_settings['shortcut']['altkey']).",\n";
-	$settings .=        "shiftkey: ".IRewriter::boolToString($this->_settings['shortcut']['shiftkey']).",\n";
-	$settings .=        "metakey: ".IRewriter::boolToString($this->_settings['shortcut']['metakey']).",\n";
-	$settings .=        "key: ".$this->_settings['shortcut']['key'].",\n";
-	$settings .=    "};\n";
-	$settings .=    "IRewriter.checkbox = {\n";
-	$settings .=        "text: '".$this->_settings['checkbox']['text']." ('+IRewriter.shortcut.toString()+')',\n";
-	$settings .=        "href: '".$this->_settings['checkbox']['href']."',\n";
-	$settings .=        "tooltip: '".$this->_settings['checkbox']['tooltip']."',\n";
-	$settings .=    "};\n";
+        $settings .=        "IRewriter.shortcut.controlkey= ".  IRewriter::boolToString($this->_settings['shortcut']['controlkey']).";\n";
+	$settings .=        "IRewriter.shortcut.altkey= ".IRewriter::boolToString($this->_settings['shortcut']['altkey']).";\n";
+	$settings .=        "IRewriter.shortcut.shiftkey= ".IRewriter::boolToString($this->_settings['shortcut']['shiftkey']).";\n";
+	$settings .=        "IRewriter.shortcut.metakey= ".IRewriter::boolToString($this->_settings['shortcut']['metakey']).";\n";
+	$settings .=        sprintf("IRewriter.shortcut.key= '%s'\n", $this->_settings['shortcut']['key']);
+	$settings .= sprintf("IRewriter.checkbox.text= '%s ('+IRewriter.shortcut.toString()+')';\n", $this->_settings['checkbox']['text']);
+	$settings .= sprintf("IRewriter.checkbox.href= '%s';\n", $this->_settings['checkbox']['href']);
+	$settings .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", $this->_settings['checkbox']['tooltip']);
 	$settings .=    'IRewriter.default_state = '.IRewriter::boolToString($this->_settings['default_state']).";\n";
 	$settings .=    "IRewriter.schemes = [\n";
         $schemeCount = count($this->_settings['schemes']);
         for($i =0; $i < $schemeCount; $i++) {
-            $settings .= 'tr_'.$this->_settings['schemes'][$i];
+            $settings .= sprintf('tr_%s', $this->_settings['schemes'][$i]);
             if($i < ($schemeCount-1)) {
                 $settings .= ', ';
             }
         }
         $settings .= "];\n";
-	$settings .= "IRewriter.default_scheme_index = ".$this->_settings['default_scheme_index'].";\n";
+        $temp = $this->_settings['default_scheme_index'];
+	//$settings .= sprintf("IRewriter.default_scheme_index = %d;\n",$temp);
 	$settings .= 'IRewriter.enabled = '.IRewriter::boolToString($this->_settings['enabled']).";\n";
 
         $settings .= "function irSetup() {\n";
 	$settings .= "inputRewrite('input');\n";
 	$settings .= "inputRewrite('textarea');\n";
-        $settings .= "IRewriter.init();\n";
+        $settings .= sprintf("IRewriter.init(%d);\n", $this->_settings['default_scheme_index']);
         if(in_array($skinName, $this->_supportedSkins)) {
             $settings .= 'setupIRewriterFor'.$skinName."();\n";
         }
