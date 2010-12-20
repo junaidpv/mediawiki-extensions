@@ -521,17 +521,15 @@ function setupIRewriterForvector() {
 	var container = document.getElementById('p-search');
 	var searchform = document.getElementById('searchform');
 	container.insertBefore(span,searchform);
+        var searchInput = document.getElementById('searchInput');
+        searchInput.style.width = '24em';
 }
 
 function setupIRewriterFormonobook() {
 	IRewriter.prepareMultiSchemeListBox();
 	IRewriter.prepareCheckBoxWithLabel();
-        var span = document.createElement("span");
-        span.style.position = 'absolute';
-        span.style.marginTop = '-1em';
-        span.appendChild(IRewriter.listBox);
-        span.appendChild(IRewriter.checkboxWL);
-	var container = document.getElementById('p-search');
 	var searchform = document.getElementById('searchform');
-	container.insertBefore(span,searchform);
+        var searchInput = document.getElementById('searchInput');
+        searchform.insertBefore(IRewriter.listBox, searchInput);
+        searchform.insertBefore(IRewriter.checkbox, searchInput);
 }

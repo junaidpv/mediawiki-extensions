@@ -32,70 +32,49 @@ $wgExtensionCredits['other'][] = array(
 	'description' => 'Allows to add custom input methods for input fields.'
 );
 
-$wgIRewriterConfig = array(
-    'shortcut' => array(
-        'controlkey' => false,
-        'altkey' => false,
-        'shiftkey' => false,
-        'metakey' => false,
-        'key' => 'M'
-    ),
-    'checkbox' => array(
-        'text' => '',
-        'link' => array(
-            'href' => '',
-            'tooltip' => ''
-        ),
-    ),
-    'default_state' => true,
-    'schemes' => array(),
-    'default_scheme_index' => 0,
-    'enabled' => true
-);
+$wgIRewriterConfig['shortcut_controlkey'] = false;
+$wgIRewriterConfig['shortcut_altkey'] = false;
+$wgIRewriterConfig['shortcut_shiftkey'] = false;
+$wgIRewriterConfig['shortcut_metakey'] = false;
+$wgIRewriterConfig['shortcut_key'] = 'M';
+$wgIRewriterConfig['default_state'] = true;
+$wgIRewriterConfig['schemes'] = array('ml', 'ta99', 'ml_inscript');
+$wgIRewriterConfig['default_scheme_index'] = 0;
+$wgIRewriterConfig['enabled'] = true;
 
+// localization
 $wgExtensionMessagesFiles['IRewriter'] = dirname(__FILE__). '/IRewriter.i18n.php';
 
 
 /**
  * IRewriter class
  *
- * implements singleten pattern
+ * (implements singleten pattern)
  * 
  * @authorJunaid P V
  * @since 0.1
  */
 class IRewriter {
+    /**
+     * One and only one instance of this class
+     * @var IRewriter
+     */
     private static $_instance;
-    /*
-    private $_schemes=array();
-    private $_shortcutKey = 'M';
-    private $_controlKey = true;
-    private $_altKey = false;
-    private $_shiftKey = false;
-    private $_metaKey = false;*/
-    private $_settings = array(
-        'shortcut' => array(
-            'controlkey' => false,
-            'altkey' => false,
-            'shiftkey' => false,
-            'metakey' => false,
-            'key' => 'M'
-        ),
-        'checkbox' => array(
-            'text' => '',
-            'link' => array(
-                'href' => '',
-                'tooltip' => ''
-            ),
-        ),
-        'default_state' => true,
-        'schemes' => array(),
-        'default_scheme_index' => 0,
-        'enabled' => true
-    );
-
+    /**
+     *
+     * @var OutputPage
+     */
     private $_out;
+    /**
+     *
+     * @var Skin
+     */
+    private $_sk;
 
+    /**
+     * Only skins listed here are supported
+     * @var array
+     */
     private $_supportedSkins = array('vector', 'monobook');
 
     /**
@@ -117,52 +96,51 @@ class IRewriter {
     }
 
     /**
-     * Add scheme to the list for loading.
-     * The object will add scripts tags to load specified scheme.
-     * The schemes should be defined in seperated javascript files
-     * under $IP/skins/commin directory.
-     * File name should in the form <scheme>_rules.js
-     *
-     * @param string $scheme
-     */
-    /*
-    public function addScheme($scheme) {
-        $this->_schemes[] = $scheme;
-    }*/
-
-    /**
      * Hook function for the event 'BeforePageDisplay'
      * @param OutputPage $out
      * @param Skin $sk 
      */
     public function onBeforePageDisplay(&$out, &$sk) {
+        // If current skin is not supported do nothing
+        if(!in_array($sk->getSkinName(), $this->_supportedSkins)) {
+            return true;
+        }
         global $wgStylePath, $wgJsMimeType, $wgScriptPath, $wgIRewriterConfig;
         $this->_out = $out;
+        $this->_sk = $sk;
         // add script tag for each scheme
         foreach ($wgIRewriterConfig['schemes'] as $scheme) {
             $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".$wgScriptPath."/extensions/IRewriter/{$scheme}_rules.js\"></script>\n");
         }
 
-        # Register tool js file for IRewriter
+        // Load IRewriter.js file
         $out->addScript("<script type=\"{$wgJsMimeType}\" src=\"".$wgScriptPath."/extensions/IRewriter/IRewriter.js\"></script>\n");
 
-        $scriptTag = '<script type="'.$wgJsMimeType.'">'.$this->getInitJSCode($sk->getSkinName()).'</script>';
+        // Place generated JS code according to configuration settings
+        $scriptTag = '<script type="'.$wgJsMimeType.'">'.$this->getInitJSCode().'</script>';
         $out->addScript($scriptTag);
         return true;
     }
 
-    private function getInitJSCode($skinName) {
+    /**
+     * Generate JavaScript code according to configuration settings
+     *
+     * @global array $wgIRewriterConfig
+     * @param Skin $skinName
+     * @return string Generated JS code
+     */
+    private function getInitJSCode() {
         global $wgIRewriterConfig;
-        $shortcut = $wgIRewriterConfig['shortcut'];
-        $str = "IRewriter.shortcut.controlkey= ".IRewriter::boolToString($shortcut['controlkey']).";\n";
-	$str .= "IRewriter.shortcut.altkey= ".IRewriter::boolToString($shortcut['altkey']).";\n";
-	$str .= "IRewriter.shortcut.shiftkey= ".IRewriter::boolToString($shortcut['shiftkey']).";\n";
-	$str .= "IRewriter.shortcut.metakey= ".IRewriter::boolToString($shortcut['metakey']).";\n";
-	$str .= sprintf("IRewriter.shortcut.key= '%s';\n", $shortcut['key']);
-	$str .= sprintf("IRewriter.checkbox.text= '%s ('+IRewriter.shortcut.toString()+')';\n", wfMsg('irewriter-toggle-ime') /*$wgIRewriterConfig['checkbox']['text']*/);
-	$str .= sprintf("IRewriter.checkbox.href= '%s';\n", $wgIRewriterConfig['checkbox']['href']);
-	$str .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", $wgIRewriterConfig['checkbox']['tooltip']);
-	//$str .=    'IRewriter.default_state = '.IRewriter::boolToString($wgIRewriterConfig['default_state']).";\n";
+        $str = "IRewriter.shortcut.controlkey= ".IRewriter::boolToString($wgIRewriterConfig['shortcut_controlkey']).";\n";
+	$str .= "IRewriter.shortcut.altkey= ".IRewriter::boolToString($wgIRewriterConfig['shortcut_altkey']).";\n";
+	$str .= "IRewriter.shortcut.shiftkey= ".IRewriter::boolToString($wgIRewriterConfig['shortcut_shiftkey']).";\n";
+	$str .= "IRewriter.shortcut.metakey= ".IRewriter::boolToString($wgIRewriterConfig['shortcut_metakey']).";\n";
+	$str .= sprintf("IRewriter.shortcut.key= '%s';\n", $wgIRewriterConfig['shortcut_key']);
+	$str .= sprintf("IRewriter.checkbox.text= '%s ('+IRewriter.shortcut.toString()+')';\n", wfMsgForContent('irewriter-toggle-ime') /*$wgIRewriterConfig['checkbox']['text']*/);
+        $title = Title::newFromText( wfMsgForContent( 'irewriter-help-page' ) );
+        $str .= sprintf("IRewriter.checkbox.href= '%s';\n", $title->getFullURL() );
+	$str .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", wfMsgForContent('irewriter-checkbox-tooltip'));
+	$str .=    'IRewriter.default_state = '.IRewriter::boolToString($wgIRewriterConfig['default_state']).";\n";
 	$str .=    "IRewriter.schemes = [\n";
         $schemeCount = count($wgIRewriterConfig['schemes']);
         for($i =0; $i < $schemeCount; $i++) {
@@ -175,18 +153,15 @@ class IRewriter {
         for($i =0; $i < $schemeCount; $i++) {
             $str .= sprintf("tr_%s.text = '%s';\n", $wgIRewriterConfig['schemes'][$i], wfMsg('irewriter-'.str_replace('_', '-', $wgIRewriterConfig['schemes'][$i])) );
         }
-
-
-        $temp = $wgIRewriterConfig['default_scheme_index'];
-	//$str .= sprintf("IRewriter.default_scheme_index = %d;\n",$temp);
+        
 	$str .= 'IRewriter.enabled = '.IRewriter::boolToString($wgIRewriterConfig['enabled']).";\n";
 
         $str .= "function irSetup() {\n";
 	$str .= "inputRewrite('input');\n";
 	$str .= "inputRewrite('textarea');\n";
         $str .= sprintf("IRewriter.init(%d);\n", $wgIRewriterConfig['default_scheme_index']);
-        if(in_array($skinName, $this->_supportedSkins)) {
-            $str .= 'setupIRewriterFor'.$skinName."();\n";
+        if(in_array($this->_sk->getSkinName(), $this->_supportedSkins)) {
+            $str .= 'setupIRewriterFor'.$this->_sk->getSkinName()."();\n";
         }
         $str .= "}\n";
         $str .= "if (window.addEventListener){\n";
@@ -197,6 +172,11 @@ class IRewriter {
         return $str;
     }
 
+    /**
+     * Convert return string representation of give bool value
+     * @param bool $value
+     * @return string
+     */
     public static function  boolToString($value) {
         return ($value) ? 'true' : 'false';
     }
