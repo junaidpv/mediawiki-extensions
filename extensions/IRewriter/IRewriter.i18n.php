@@ -15,11 +15,16 @@ $messages = array();
  */
 $messages['en'] = array(
     'irewriter-toggle-ime' => 'To toggle IM',
-    'irewriter-ml' => 'Malayalam Transliteration',
-    'irewriter-ml-inscript' => 'Malayalam InScript',
-    'irewriter-ta99' => 'Tamil99',
     'irewriter-help-page' => 'Help:Typing',
     'irewriter-checkbox-tooltip' => 'To toggle input method On and Off',
+    'irewriter-ml' => 'Malayalam Transliteration',
+    'irewriter-ml-inscript' => 'Malayalam InScript',
+    'irewriter-sa' => 'Sanskrit Transliteration',
+    'irewriter-ta99' => 'Tamil99',
+    'irewriter-ta' => 'Tamil Transliteration',
+    'irewriter-bn-avro' => 'Bengali Avro',
+    'irewriter-bn-inscript' => 'Bengali InScript',
+    'irewriter-bn-nkb' => 'Bengali NKB',
 );
 
 /** Malayalam
