@@ -105,7 +105,7 @@ class IRewriter {
         if(!in_array($sk->getSkinName(), $this->_supportedSkins)) {
             return true;
         }
-        global $wgStylePath, $wgJsMimeType, $wgScriptPath, $wgIRewriterConfig;
+        global $wgJsMimeType, $wgScriptPath, $wgIRewriterConfig;
         $this->_out = $out;
         $this->_sk = $sk;
         // add script tag for each scheme
@@ -150,6 +150,7 @@ class IRewriter {
             }
         }
         $str .= "];\n";
+        $str .= sprintf("IRewriter.default_scheme_index = %d;", $wgIRewriterConfig['default_scheme_index']);
         for($i =0; $i < $schemeCount; $i++) {
             $str .= sprintf("tr_%s.text = '%s';\n", $wgIRewriterConfig['schemes'][$i], wfMsg('irewriter-'.str_replace('_', '-', $wgIRewriterConfig['schemes'][$i])) );
         }
@@ -159,7 +160,7 @@ class IRewriter {
         $str .= "function irSetup() {\n";
 	$str .= "inputRewrite('input');\n";
 	$str .= "inputRewrite('textarea');\n";
-        $str .= sprintf("IRewriter.init(%d);\n", $wgIRewriterConfig['default_scheme_index']);
+        //$str .= sprintf("IRewriter.init(%d);\n", $wgIRewriterConfig['default_scheme_index']);
         if(in_array($this->_sk->getSkinName(), $this->_supportedSkins)) {
             $str .= 'setupIRewriterFor'.$this->_sk->getSkinName()."();\n";
         }

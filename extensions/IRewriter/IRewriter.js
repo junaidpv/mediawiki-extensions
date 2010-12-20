@@ -172,229 +172,205 @@ function setCookie(cookieName,cookieValue,nDays) {
  * from: http://www.javascripter.net/faq/readinga.htm
  */
 function readCookie(cookieName) {
-	var theCookie=""+document.cookie;
-	var ind=theCookie.indexOf(cookieName);
-	if (ind==-1 || cookieName=="") return "";
-	var ind1=theCookie.indexOf(';',ind);
-	if (ind1==-1) ind1=theCookie.length;
-	return unescape(theCookie.substring(ind+cookieName.length+1,ind1));
+    var theCookie=""+document.cookie;
+    var ind=theCookie.indexOf(cookieName);
+    if (ind==-1 || cookieName=="") return "";
+    var ind1=theCookie.indexOf(';',ind);
+    if (ind1==-1) ind1=theCookie.length;
+    return unescape(theCookie.substring(ind+cookieName.length+1,ind1));
 }
 
 IRewriter.enableTrasliteration = function(enable) {
-	if(enable==undefined) {
-		enable = true;
-	}
-	var cookieValue;
-        IRewriter.enabled  = enable;
-	if(enable) {
+    if(enable==undefined) {
+        enable = true;
+    }
+    var cookieValue;
+    IRewriter.enabled  = enable;
+    if(enable) {
 		
-		//IRewriter.temp_disable = false;
-		cookieValue = 1;
-	}
-	else {
-		cookieValue = 0;
-	}
-	if(IRewriter.checkbox.element) {
-		IRewriter.checkbox.element.checked = enable;
-	}
-	setCookie("irewriter-enabled", cookieValue);
+        //IRewriter.temp_disable = false;
+        cookieValue = 1;
+    }
+    else {
+        cookieValue = 0;
+    }
+    if(IRewriter.checkboxElement) {
+        IRewriter.checkboxElement.checked = enable;
+    }
+    setCookie("irewriter-enabled", cookieValue);
 }
 
 // stop propagation of given event
 function stopPropagation(event) {
-	event.cancelBubble = true;
-	event.returnValue = false;
-	//event.stopPropagation works in Firefox.
-	if (event.stopPropagation) event.stopPropagation();
-	if(event.preventDefault) event.preventDefault();
+    event.cancelBubble = true;
+    event.returnValue = false;
+    //event.stopPropagation works in Firefox.
+    if (event.stopPropagation) event.stopPropagation();
+    if(event.preventDefault) event.preventDefault();
 }
 
 function shortKeyPressed(event) {
-	var e = event || window.event;
-	var targetElement;
-	if(e.target) targetElement=e.target;
-	else if(e.srcElement) targetElement=e.srcElement;
-	var code;
-	if (e.keyCode) code = e.keyCode;
-	else if (e.which) code = e.which;
+    var e = event || window.event;
+    var targetElement;
+    if(e.target) targetElement=e.target;
+    else if(e.srcElement) targetElement=e.srcElement;
+    var code;
+    if (e.keyCode) code = e.keyCode;
+    else if (e.which) code = e.which;
 
-	var controlKey = false;
-	var shiftKey = false;
-	var altKey = false;
-	var metaKey = false;
-	if(e.ctrlKey)	controlKey = true;
-	if(e.shiftKey)	shiftKey = true;
-	if(e.altKey)	altKey = true;
-	if(e.metaKey)   metaKey = true;
-	var shortcut = IRewriter.shortcut;
-	// If shortkey has been specified
-	if((shortcut.controlkey || shortcut.shiftkey || shortcut.altkey || shortcut.metakey) &&
-		(shortcut.controlkey==controlKey && shortcut.shiftkey==shiftKey && shortcut.altkey==altKey && shortcut.metakey==metaKey) &&
-		String.fromCharCode(code).toLowerCase()==shortcut.key.toLowerCase())
-		{
-		IRewriter.enableTrasliteration(!IRewriter.enabled );
-		stopPropagation(e);
-		return false;
-	}
-	return true;
+    var controlKey = false;
+    var shiftKey = false;
+    var altKey = false;
+    var metaKey = false;
+    if(e.ctrlKey)	controlKey = true;
+    if(e.shiftKey)	shiftKey = true;
+    if(e.altKey)	altKey = true;
+    if(e.metaKey)   metaKey = true;
+    var shortcut = IRewriter.shortcut;
+    // If shortkey has been specified
+    if((shortcut.controlkey || shortcut.shiftkey || shortcut.altkey || shortcut.metakey) &&
+        (shortcut.controlkey==controlKey && shortcut.shiftkey==shiftKey && shortcut.altkey==altKey && shortcut.metakey==metaKey) &&
+        String.fromCharCode(code).toLowerCase()==shortcut.key.toLowerCase())
+        {
+        IRewriter.enableTrasliteration(!IRewriter.enabled );
+        stopPropagation(e);
+        return false;
+    }
+    return true;
 }
 // event listener for trasliterattion textfield
 // also listen for Ctrl+M combination to disable and enable trasliteration
 function tiKeyPressed(event) {
-	var e = event || window.event;
-	var keyCode;
-	if (e.keyCode) keyCode = e.keyCode;
-	else if (e.which) keyCode = e.which;
+    var e = event || window.event;
+    var keyCode;
+    if (e.keyCode) keyCode = e.keyCode;
+    else if (e.which) keyCode = e.which;
 
-	//var charCode = e.charCode || e.keyCode;
-	var charCode;
-	if (e.keyCode) charCode = e.keyCode;
-	else if (e.which) charCode = e.which;
+    //var charCode = e.charCode || e.keyCode;
+    var charCode;
+    if (e.keyCode) charCode = e.keyCode;
+    else if (e.which) charCode = e.which;
 
-	var targetElement = (e.currentTarget || e.srcElement);
+    var targetElement = (e.currentTarget || e.srcElement);
 
-	if (keyCode == 8 ) {
-		IRewriter.previous_sequence[targetElement.id] = '';
-		return true;
-	} // Backspace
-	// If this keystroke is a function key of any kind, do not filter it
-	if (e.charCode == 0 || e.which ==0 ) return true;       // Function key (Firefox and Opera), e.charCode for Firefox and e.which for Opera
-	// If control or alt or meta key pressed
-	if(e.ctrlKey || (e.altKey && !IRewriter.current_scheme.extended_keyboard) || e.metaKey) {
-		//if (navigator.userAgent.indexOf("Firefox")!=-1) {
-		//	return shortKeyPressed(event);
-		//}
-		return true;
-	}
-	if (charCode < 32) return true;             // ASCII control character
-	if(IRewriter.enabled )
-	{
+    if (keyCode == 8 ) {
+        IRewriter.previous_sequence[targetElement.id] = '';
+        return true;
+    } // Backspace
+    // If this keystroke is a function key of any kind, do not filter it
+    if (e.charCode == 0 || e.which ==0 ) return true;       // Function key (Firefox and Opera), e.charCode for Firefox and e.which for Opera
+    // If control or alt or meta key pressed
+    if(e.ctrlKey || (e.altKey && !IRewriter.current_scheme.extended_keyboard) || e.metaKey) {
+        //if (navigator.userAgent.indexOf("Firefox")!=-1) {
+        //	return shortKeyPressed(event);
+        //}
+        return true;
+    }
+    if (charCode < 32) return true;             // ASCII control character
+    if(IRewriter.enabled )
+    {
 
-		var c = String.fromCharCode(charCode);
-		var selectionRange = GetCaretPosition(targetElement);
-		var lastSevenChars = getLastNChars(targetElement.value, selectionRange['start'], IRewriter.check_str_length);
-		var oldString;
-		var newString;
-		/*
+        var c = String.fromCharCode(charCode);
+        var selectionRange = GetCaretPosition(targetElement);
+        var lastSevenChars = getLastNChars(targetElement.value, selectionRange['start'], IRewriter.check_str_length);
+        var oldString;
+        var newString;
+        /*
 		if(charCode ==62 && IRewriter.previous_sequence[targetElement.id ].substring(IRewriter.previous_sequence[targetElement.id ].length-1)=="<")
 		{
 			oldString = "<>";
 			newString = "";
 			IRewriter.temp_disable = !IRewriter.temp_disable;
 		}*/
-		//else {
-			//if(!IRewriter.temp_disable)
-			//{
-				var transPair;
-				if(IRewriter.current_scheme.extended_keyboard && e.altKey) {
-					transPair = transli(lastSevenChars+c, e, IRewriter.current_scheme.rules_x);
-				}
-				else transPair = transli(lastSevenChars+c, e, IRewriter.current_scheme.rules);
-				oldString = transPair[0];
-				newString = transPair[1];
-			//}
-			/*
+        //else {
+        //if(!IRewriter.temp_disable)
+        //{
+        var transPair;
+        if(IRewriter.current_scheme.extended_keyboard && e.altKey) {
+            transPair = transli(lastSevenChars+c, e, IRewriter.current_scheme.rules_x);
+        }
+        else transPair = transli(lastSevenChars+c, e, IRewriter.current_scheme.rules);
+        oldString = transPair[0];
+        newString = transPair[1];
+        //}
+        /*
 			else
 			{
 				oldString = c;
 				newString = c;
 			}*/
-		//}
-		replaceTransStringAtCaret(targetElement, oldString.length, newString , selectionRange);
-		IRewriter.previous_sequence[targetElement.id ] += c;
-		if(IRewriter.previous_sequence[targetElement.id ].length > IRewriter.check_str_length ) IRewriter.previous_sequence[targetElement.id ] = IRewriter.previous_sequence[targetElement.id ].substring(IRewriter.previous_sequence[targetElement.id ].length-IRewriter.check_str_length);
-		stopPropagation(e);
-		return false;
-	}
-	return true;
+        //}
+        replaceTransStringAtCaret(targetElement, oldString.length, newString , selectionRange);
+        IRewriter.previous_sequence[targetElement.id ] += c;
+        if(IRewriter.previous_sequence[targetElement.id ].length > IRewriter.check_str_length ) IRewriter.previous_sequence[targetElement.id ] = IRewriter.previous_sequence[targetElement.id ].substring(IRewriter.previous_sequence[targetElement.id ].length-IRewriter.check_str_length);
+        stopPropagation(e);
+        return false;
+    }
+    return true;
 }
 
 function tiKeyDown(event) {
-	var e = event || window.event;
-	var targetElement;
-	if(e.target) targetElement=e.target;
-	else if(e.srcElement) targetElement=e.srcElement;
-	if(IRewriter.current_scheme.extended_keyboard && e.altKey && !e.ctrlKey && !e.metaKey /*&& IRewriter.temp_disable*/) stopPropagation(e);
-	else if(e.ctrlKey || e.altKey || e.metaKey) {
-		return shortKeyPressed(event);
-	}
-	return true;
+    var e = event || window.event;
+    var targetElement;
+    if(e.target) targetElement=e.target;
+    else if(e.srcElement) targetElement=e.srcElement;
+    if(IRewriter.current_scheme.extended_keyboard && e.altKey && !e.ctrlKey && !e.metaKey /*&& IRewriter.temp_disable*/) stopPropagation(e);
+    else if(e.ctrlKey || e.altKey || e.metaKey) {
+        return shortKeyPressed(event);
+    }
+    return true;
 }
 /**
  * This is the function to which call during window load event for trasliterating textfields.
  * The funtion will accept any number of HTML tag IDs of textfields.
 */
 function inputRewrite(tagName) {
-	var elements = document.getElementsByTagName(tagName);
-	var len = elements.length;
-	for(var i=0;i<len; i++)
-	{
-		var element = elements[i];
-		if(element.id ==undefined || element.id.length == 0) {
-			element.id = 'irtempid-'+IRewriter.id;
-			IRewriter.id = IRewriter.id + 1;
-		}
-		if(element)
-		{
-			//IRewriter.enabled  = IRewriter.default_state;
-			IRewriter.previous_sequence[element.id] = '';
-			if (element.addEventListener){
-				element.addEventListener('keydown', tiKeyDown, false);
-				element.addEventListener('keypress', tiKeyPressed, false);
-			} else if (element.attachEvent){
-				element.attachEvent('onkeydown', tiKeyDown);
-				element.attachEvent("onkeypress", tiKeyPressed);
-			}
-		}
-	}
+    var elements = document.getElementsByTagName(tagName);
+    var len = elements.length;
+    for(var i=0;i<len; i++)
+    {
+        var element = elements[i];
+        // filter out non text inputs
+        //if(element && tagName == 'input' && element.type != 'text') break;
+        if(element.id ==undefined || element.id.length == 0) {
+            element.id = 'irtempid-'+IRewriter.id;
+            IRewriter.id = IRewriter.id + 1;
+        }
+        if(element)
+        {
+            //IRewriter.enabled  = IRewriter.default_state;
+            IRewriter.previous_sequence[element.id] = '';
+            if (element.addEventListener){
+                element.addEventListener('keydown', tiKeyDown, false);
+                element.addEventListener('keypress', tiKeyPressed, false);
+            } else if (element.attachEvent){
+                element.attachEvent('onkeydown', tiKeyDown);
+                element.attachEvent("onkeypress", tiKeyPressed);
+            }
+        }
+    }
 }
 
 function transOptionOnClick(event)
 {
-	var e = event || window.event;
-	var checkbox =  (e.currentTarget || e.srcElement);
-	if(checkbox.checked)
-	{
-		IRewriter.enableTrasliteration(checkbox.value,true);
-	}
-	else
-	{
-		IRewriter.enableTrasliteration(checkbox.value,false);
-	}
+    var e = event || window.event;
+    var checkbox =  (e.currentTarget || e.srcElement);
+    if(checkbox.checked)
+    {
+        IRewriter.enableTrasliteration(checkbox.value,true);
+    }
+    else
+    {
+        IRewriter.enableTrasliteration(checkbox.value,false);
+    }
 }
-/*
-// call this function to add checkbox to enable/disable transliteration
-function addTransliterationOption()
-{
-	var len = arguments.length;
-	for(var i=0;i<len; i++)
-	{
-		var element = document.getElementById(arguments[i]);
-		if(element)
-		{
-			var checkbox = document.createElement('input');
-			checkbox.id = arguments[i]+'cb';
-			checkbox.type = 'checkbox';
-			checkbox.value = arguments[i];
-			checkbox.onclick = transOptionOnClick;
-			checkbox.checked = IRewriter.default_state;
-			var para = document.createElement('p');
-			para.appendChild(checkbox);
-			var text = document.createTextNode(IRewriter.checkbox.text);
-			para.appendChild(text);
-			if(IRewriter.checkbox.position=="after") element.parentNode.insertBefore(para, element.nextSibling);
-			else if(IRewriter.checkbox.position=="before") element.parentNode.insertBefore(para, element);
-		}
-	}
-}*/
-
 
 
 function writingStyleLBChanged(event) {
-	var e = event || window.event;
-	var listBox =  (e.currentTarget || e.srcElement);
-	IRewriter.current_scheme = IRewriter.schemes[listBox.selectedIndex];
-	setCookie("transToolIndex", listBox.selectedIndex);
+    var e = event || window.event;
+    var listBox =  (e.currentTarget || e.srcElement);
+    IRewriter.current_scheme = IRewriter.schemes[listBox.selectedIndex];
+    setCookie("transToolIndex", listBox.selectedIndex);
 }
 
 // IRewriter setup and initialization code
@@ -408,50 +384,46 @@ IRewriter.id = 0;
 
 // shortcut key settings
 IRewriter.shortcut.toString = function() {
-	var parts= [];
-	if(this.controlkey) parts.push('Ctrl');
-	if(this.shiftkey) parts.push('Shift');
-	if(this.altkey) parts.push('Alt');
-	if(this.metakey) parts.push('Meta');
-	parts.push(this.key.toUpperCase());
-	return parts.join('+');
+    var parts= [];
+    if(this.controlkey) parts.push('Ctrl');
+    if(this.shiftkey) parts.push('Shift');
+    if(this.altkey) parts.push('Alt');
+    if(this.metakey) parts.push('Meta');
+    parts.push(this.key.toUpperCase());
+    return parts.join('+');
 }
-/*
-IRewriter.initMultiSchemeIndex = function() {
-	IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
-}*/
 
 /**
  * This functions is to synchronize IRewriter state from cookie
  */
 IRewriter.translitStateSynWithCookie = function() {
-	var state = parseInt(readCookie(IRewriter.prefix ));
-	var enable = IRewriter.enabled;
-	if(state == 1)  enable=true;
-	else if(state==0) enable =false;
-	IRewriter.enableTrasliteration(enable);
+    var state = parseInt(readCookie(IRewriter.prefix ));
+    var enable = IRewriter.enabled;
+    if(state == 1)  enable=true;
+    else if(state==0) enable =false;
+    IRewriter.enableTrasliteration(enable);
 }
 /* Settings */
 IRewriter.shortcut = {
-	controlkey: false,
-	altkey: false,
-	shiftkey: false,
-	metakey: false,
-	key: '',	// eg: 'M'
-        toString: function() {
-            var parts= [];
-            if(IRewriter.shortcut.controlkey) parts.push('Ctrl');
-            if(IRewriter.shortcut.shiftkey) parts.push('Shift');
-            if(IRewriter.shortcut.altkey) parts.push('Alt');
-            if(IRewriter.shortcut.metakey) parts.push('Meta');
-            parts.push(IRewriter.shortcut.key.toUpperCase());
-            return parts.join('+');
-        }
+    controlkey: false,
+    altkey: false,
+    shiftkey: false,
+    metakey: false,
+    key: '',	// eg: 'M'
+    toString: function() {
+        var parts= [];
+        if(IRewriter.shortcut.controlkey) parts.push('Ctrl');
+        if(IRewriter.shortcut.shiftkey) parts.push('Shift');
+        if(IRewriter.shortcut.altkey) parts.push('Alt');
+        if(IRewriter.shortcut.metakey) parts.push('Meta');
+        parts.push(IRewriter.shortcut.key.toUpperCase());
+        return parts.join('+');
+    }
 };
 IRewriter.checkbox = {
-	text: '', // eg: 'To toggle ('+ IRewriter.shortcut.toString()+ ')'
-	href: '', // eg: 'http://ml.wikipedia.org/wiki/Help:Typing'
-	tooltip: '' // eg: 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')'
+    text: '', // eg: 'To toggle ('+ IRewriter.shortcut.toString()+ ')'
+    href: '', // eg: 'http://ml.wikipedia.org/wiki/Help:Typing'
+    tooltip: '' // eg: 'To write Malayalam use this tool, shortcut: ('+ IRewriter.shortcut.toString()+ ')'
 };
 //IRewriter.default_state = true;
 IRewriter.schemes =  []; // eg: [tr_ml, tr_ml_inscript]
@@ -459,77 +431,106 @@ IRewriter.default_scheme_index = 0; // eg: 0
 IRewriter.enabled = true;
 IRewriter.prefix = 'irewriter-';
 IRewriter.check_str_length = 6;
-// temporary disabling of transliteration
-//IRewriter.temp_disable = !IRewriter.enabled;
 
-IRewriter.init = function(index) {
-	IRewriter.current_scheme = IRewriter.schemes[index];
-	this.translitStateSynWithCookie();
+IRewriter.init = function() {
+    IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
+    this.translitStateSynWithCookie();
 }
 
 IRewriter.prepareMultiSchemeListBox = function() {
-	this.listBox = document.createElement("select");
-	if (this.listBox.addEventListener)
-		this.listBox.addEventListener("change", writingStyleLBChanged, false);
-	else if (this.listBox.attachEvent)
-		this.listBox.attachEvent("onchange", writingStyleLBChanged);
-	var numOfSchemes = IRewriter.schemes.length;
-	for(var i=0; i < numOfSchemes; i++) {
-		var schemeOption = document.createElement("option");
-		schemeOption.appendChild( document.createTextNode(IRewriter.schemes[i].text) );
-		schemeOption.value = IRewriter.schemes[i].text;
-		if(IRewriter.default_scheme_index==i) schemeOption.selected=true;
-		this.listBox.appendChild( schemeOption );
-	}
+    this.listBox = document.createElement("select");
+    if (this.listBox.addEventListener)
+        this.listBox.addEventListener("change", writingStyleLBChanged, false);
+    else if (this.listBox.attachEvent)
+        this.listBox.attachEvent("onchange", writingStyleLBChanged);
+    var numOfSchemes = IRewriter.schemes.length;
+    for(var i=0; i < numOfSchemes; i++) {
+        var schemeOption = document.createElement("option");
+        schemeOption.appendChild( document.createTextNode(IRewriter.schemes[i].text) );
+        schemeOption.value = IRewriter.schemes[i].text;
+        if(IRewriter.default_scheme_index==i) schemeOption.selected=true;
+        this.listBox.appendChild( schemeOption );
+    }
 }
 
 IRewriter.prepareCheckBoxWithLabel = function() {
-	var checkbox = document.createElement("input");
-	checkbox.type = "checkbox";
-	checkbox.id = this.prefix+'cb';
-	checkbox.value = 'searchInput'; // specifying curresponding input filed.
-	checkbox.checked = IRewriter.enabled;
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = this.prefix+'cb';
+    checkbox.value = 'searchInput'; // specifying curresponding input filed.
+    checkbox.checked = IRewriter.enabled;
+    this.checkboxElement = checkbox;
 
-	if (checkbox.addEventListener)
-		checkbox.addEventListener("click", transOptionOnClick, false);
-	else if (checkbox.attachEvent)
-		checkbox.attachEvent("onclick", transOptionOnClick);
+    if (checkbox.addEventListener)
+        checkbox.addEventListener("click", transOptionOnClick, false);
+    else if (checkbox.attachEvent)
+        checkbox.attachEvent("onclick", transOptionOnClick);
 
-	var label = document.createElement('label');
-	var linktohelp = document.createElement ('a');
-	linktohelp.href= this.checkbox.href;
-	linktohelp.title= this.checkbox.tooltip;
-	linktohelp.appendChild( document.createTextNode(this.checkbox.text) );
-	label.appendChild(linktohelp);
+    var label = document.createElement('label');
+    var linktohelp = document.createElement ('a');
+    linktohelp.href= this.checkbox.href;
+    linktohelp.title= this.checkbox.tooltip;
+    linktohelp.appendChild( document.createTextNode(this.checkbox.text) );
+    label.appendChild(linktohelp);
 
-	this.checkboxWL = document.createElement('span');
-	this.checkboxWL.style.padding = 0;
-        this.checkboxWL.id = this.prefix+'cbwl';
-	this.checkboxWL.style.margin = 0;
-	this.checkboxWL.appendChild(checkbox);
-	this.checkboxWL.appendChild(label);
+    this.checkboxWL = document.createElement('span');
+    this.checkboxWL.style.padding = 0;
+    this.checkboxWL.id = this.prefix+'cbwl';
+    this.checkboxWL.style.margin = 0;
+    this.checkboxWL.appendChild(checkbox);
+    this.checkboxWL.appendChild(label);
 }
 
 function setupIRewriterForvector() {
-	IRewriter.prepareMultiSchemeListBox();
-	IRewriter.prepareCheckBoxWithLabel();
-        var span = document.createElement("span");
-        span.style.position = 'absolute';
-        span.style.marginTop = '-1em';
-        span.appendChild(IRewriter.listBox);
-        span.appendChild(IRewriter.checkboxWL);
-	var container = document.getElementById('p-search');
-	var searchform = document.getElementById('searchform');
-	container.insertBefore(span,searchform);
-        var searchInput = document.getElementById('searchInput');
-        searchInput.style.width = '24em';
+    IRewriter.prepareMultiSchemeListBox();
+    IRewriter.prepareCheckBoxWithLabel();
+    //IRewriter.listBox.style.width = '10em';
+    IRewriter.checkboxWL.style.fontSize = '80%';
+    var span = document.createElement("span");
+    span.style.position = 'absolute';
+    span.style.top = '1.4em';
+    span.style.right = '0.5em';
+    //span.style.right = '0em';
+    span.appendChild(IRewriter.listBox);
+    span.appendChild(IRewriter.checkboxWL);
+    var container = document.getElementById('p-search');
+    var searchform = document.getElementById('searchform');
+    container.insertBefore(span,searchform);
+    //var searchInput = document.getElementById('searchInput');
+    IRewriter.init();
 }
+/*
+function setupIRewriterForvector() {
+    IRewriter.prepareMultiSchemeListBox();
+    IRewriter.prepareCheckBoxWithLabel();
+    IRewriter.listBox.style.width = '9em';
+    var mwPanel = document.getElementById('mw-panel');
+    var pNavigation = document.getElementById('p-navigation');
+    var h5 = document.createElement('h5');
+    h5.appendChild(document.createTextNode('IRewriter'));
+    var bodyDiv = document.createElement('div');
+    var label = document.createElement('label');
+    label.appendChild(document.createTextNode('Input method:'));
+    bodyDiv.appendChild(label);
+    bodyDiv.appendChild(document.createElement('br'));
+    bodyDiv.appendChild(IRewriter.listBox);
+    bodyDiv.appendChild(document.createElement('br'));
+    bodyDiv.appendChild(IRewriter.checkboxWL);
+    bodyDiv.className = 'body';
+    var portalDiv = document.createElement('div');
+    portalDiv.className = 'portal';
+    portalDiv.appendChild(h5);
+    portalDiv.appendChild(bodyDiv);
+    mwPanel.insertBefore(portalDiv, pNavigation)
+}*/
 
 function setupIRewriterFormonobook() {
-	IRewriter.prepareMultiSchemeListBox();
-	IRewriter.prepareCheckBoxWithLabel();
-	var searchform = document.getElementById('searchform');
-        var searchInput = document.getElementById('searchInput');
-        searchform.insertBefore(IRewriter.listBox, searchInput);
-        searchform.insertBefore(IRewriter.checkbox, searchInput);
+    IRewriter.prepareMultiSchemeListBox();
+    IRewriter.prepareCheckBoxWithLabel();
+    IRewriter.listBox.style.width = '9em';
+    var searchform = document.getElementById('searchform');
+    var searchInput = document.getElementById('searchInput');
+    searchform.insertBefore(IRewriter.listBox, searchInput);
+    searchform.insertBefore(IRewriter.checkboxWL, searchInput);
+    IRewriter.init();
 }
