@@ -21,3 +21,15 @@ $messages['en'] = array(
     'irewriter-help-page' => 'Help:Typing',
     'irewriter-checkbox-tooltip' => 'To toggle input method On and Off',
 );
+
+/** Malayalam
+ * @author Junaid P V
+ */
+$messages['ml'] = array(
+    'irewriter-toggle-ime' => 'മലയാളത്തിലെഴുതുക',
+    'irewriter-ml' => 'മലയാളം ലിപ്യന്തരണം',
+    'irewriter-ml-inscript' => 'മലയാളം ഇൻസ്ക്രിപ്റ്റ്',
+    'irewriter-ta99' => 'തമിഴ്99',
+    'irewriter-help-page' => 'Help:എഴുത്ത്',
+    'irewriter-checkbox-tooltip' => 'മലയാളത്തിലെഴുതാൻ ഈ ഉപാധി സ്വീകരിക്കുക',
+);
