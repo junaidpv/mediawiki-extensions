@@ -197,7 +197,7 @@ IRewriter.enableTrasliteration = function(enable) {
     if(IRewriter.checkboxElement) {
         IRewriter.checkboxElement.checked = enable;
     }
-    setCookie("irewriter-enabled", cookieValue);
+    setCookie(IRewriter.prefix+'-enabled', cookieValue);
 }
 
 // stop propagation of given event
@@ -357,11 +357,11 @@ function transOptionOnClick(event)
     var checkbox =  (e.currentTarget || e.srcElement);
     if(checkbox.checked)
     {
-        IRewriter.enableTrasliteration(checkbox.value,true);
+        IRewriter.enableTrasliteration(true);
     }
     else
     {
-        IRewriter.enableTrasliteration(checkbox.value,false);
+        IRewriter.enableTrasliteration(false);
     }
 }
 
@@ -370,7 +370,7 @@ function writingStyleLBChanged(event) {
     var e = event || window.event;
     var listBox =  (e.currentTarget || e.srcElement);
     IRewriter.current_scheme = IRewriter.schemes[listBox.selectedIndex];
-    setCookie("transToolIndex", listBox.selectedIndex);
+    setCookie(IRewriter.prefix+'-default-index', listBox.selectedIndex);
 }
 
 // IRewriter setup and initialization code
@@ -397,11 +397,16 @@ IRewriter.shortcut.toString = function() {
  * This functions is to synchronize IRewriter state from cookie
  */
 IRewriter.translitStateSynWithCookie = function() {
-    var state = parseInt(readCookie(IRewriter.prefix ));
+    var state = parseInt(readCookie(IRewriter.prefix+'-enabled' ));
     var enable = IRewriter.enabled;
     if(state == 1)  enable=true;
     else if(state==0) enable =false;
     IRewriter.enableTrasliteration(enable);
+    var schemeIndex = parseInt(readCookie(IRewriter.prefix+'-default-index'))
+    if(schemeIndex > 0 && schemeIndex < IRewriter.schemes.length) {
+        IRewriter.listBox.selectedIndex = schemeIndex;
+    }
+    else IRewriter.listBox.selectedIndex = IRewriter.default_scheme_index;
 }
 /* Settings */
 IRewriter.shortcut = {
