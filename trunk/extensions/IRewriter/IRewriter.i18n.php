@@ -40,6 +40,6 @@ $messages['ml'] = array(
     'irewriter-ta99' => 'തമിഴ്99',
 	'irewriter-ta' => 'തമിഴ് ലിപ്യന്തരണം',
     'irewriter-bn-avro' => 'ബംഗാളി അവ്രൊ',
-    'irewriter-bn-inscript' => 'ബംഗാളിൽ ഇൻസ്ക്രിപ്റ്റ്',
-    'irewriter-bn-nkb' => 'ബംഗാളിൽ നാഷണൽ കീബോർഡ്',
+    'irewriter-bn-inscript' => 'ബംഗാളി ഇൻസ്ക്രിപ്റ്റ്',
+    'irewriter-bn-nkb' => 'ബംഗാളി നാഷണൽ കീബോർഡ്',
 );
