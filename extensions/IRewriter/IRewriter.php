@@ -157,9 +157,11 @@ class IRewriter {
         
 	$str .= 'IRewriter.enabled = '.IRewriter::boolToString($wgIRewriterConfig['enabled']).";\n";
 
-        $str .= "function irSetup() {\n";
-	$str .= "inputRewrite('input');\n";
-	$str .= "inputRewrite('textarea');\n";
+    $str .= "function irSetup() {\n";
+    $str .= "var elements = getAllTextInputs();\n";
+	$str .= "inputRewrite(elements);\n";
+    $str .= "elements = document.getElementsByTagName('textarea');";
+	$str .= "inputRewrite(elements);\n";
         //$str .= sprintf("IRewriter.init(%d);\n", $wgIRewriterConfig['default_scheme_index']);
         if(in_array($this->_sk->getSkinName(), $this->_supportedSkins)) {
             $str .= 'setupIRewriterFor'.$this->_sk->getSkinName()."();\n";
