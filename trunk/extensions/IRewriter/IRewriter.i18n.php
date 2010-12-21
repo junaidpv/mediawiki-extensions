@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Internationalisation file for extension IRewriter
  *
@@ -31,10 +31,15 @@ $messages['en'] = array(
  * @author Junaid P V
  */
 $messages['ml'] = array(
-    'irewriter-toggle-ime' => 'മലയാളത്തിലെഴുതുക',
+    'irewriter-toggle-ime' => 'ഇൻപുട്ട് മെത്തേഡ്',
+	'irewriter-help-page' => 'Help:എഴുത്ത്',
+	'irewriter-checkbox-tooltip' => 'ഇൻപുട്ട് മെത്തേഡ് നിയന്ത്രിക്കാൻ ഇതുപയോഗിക്കുക',
     'irewriter-ml' => 'മലയാളം ലിപ്യന്തരണം',
     'irewriter-ml-inscript' => 'മലയാളം ഇൻസ്ക്രിപ്റ്റ്',
+	'irewriter-sa' => 'സംസ്കൃതം ലിപ്യന്തരണം',
     'irewriter-ta99' => 'തമിഴ്99',
-    'irewriter-help-page' => 'Help:എഴുത്ത്',
-    'irewriter-checkbox-tooltip' => 'മലയാളത്തിലെഴുതാൻ ഈ ഉപാധി സ്വീകരിക്കുക',
+	'irewriter-ta' => 'തമിഴ് ലിപ്യന്തരണം',
+    'irewriter-bn-avro' => 'ബംഗാളി അവ്രൊ',
+    'irewriter-bn-inscript' => 'ബംഗാളിൽ ഇൻസ്ക്രിപ്റ്റ്',
+    'irewriter-bn-nkb' => 'ബംഗാളിൽ നാഷണൽ കീബോർഡ്',
 );

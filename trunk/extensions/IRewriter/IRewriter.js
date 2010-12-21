@@ -1,4 +1,4 @@
-﻿/**
+/**
  * IRewriter
  * Input field rewrioter tool for web pages
  * @author Junaid P V ([[user:Junaidpv]])(http://junaidpv.in)
@@ -88,6 +88,19 @@ function setCaretPosition (el, iCaretPos)
     }
 }
 
+function getAllTextInputs() {
+    var inputs = document.getElementsByTagName('input');
+    var textInputs = [];
+    var count = inputs.length;
+    for(var i=0; i < count; i++) {
+        element = inputs[i];
+        if(element.getAttribute('type')==='text' || element.getAttribute('type')==='search' || element.getAttribute('type')==='' || element.getAttribute('type')== undefined) {
+            textInputs.push(element);
+        }
+    }
+    return textInputs;
+}
+
 function getLastNChars(str, caretPosition, numberOfChars)
 {
     if(caretPosition <= numberOfChars ) return str.substring(0,caretPosition);
@@ -166,7 +179,7 @@ function setCookie(cookieName,cookieValue,nDays) {
     var expire = new Date();
     if (nDays==null || nDays==0) nDays=1;
     expire.setTime(today.getTime() + 3600000*24*nDays);
-    document.cookie = cookieName+"="+escape(cookieValue)+ ";expires="+expire.toGMTString();
+    document.cookie = cookieName+"="+escape(cookieValue)+ ";expires="+expire.toGMTString()+";path=/";
 }
 /**
  * from: http://www.javascripter.net/faq/readinga.htm
@@ -186,6 +199,25 @@ IRewriter.enableTrasliteration = function(enable) {
     }
     var cookieValue;
     IRewriter.enabled  = enable;
+    var count= IRewriter.elements.length;
+    for(var i=0; i < count; i++) {
+        var element = IRewriter.elements[i];
+        if(!element.style) {
+            element.style = new CSS2Properties();
+        }
+        if(IRewriter.enabled) {
+            //IRewriter.elementBorders[element.id] = element.style.border;
+            element.style.border = IRewriter.border;
+            //IRewriter.elementBackColors[element.id] = element.style.backgroundColor;
+            element.style.backgroundColor = IRewriter.back_color;
+        }
+        if(element.style && !IRewriter.enabled) {
+            //IRewriter.elementBorders[element.id] = element.style.border;
+            element.style.border = IRewriter.elementBorders[element.id];
+            //IRewriter.elementBackColors[element.id] = element.style.backgroundColor;
+            element.style.backgroundColor = IRewriter.elementBackColors[element.id];
+        }
+    }    
     if(enable) {
 		
         //IRewriter.temp_disable = false;
@@ -197,7 +229,7 @@ IRewriter.enableTrasliteration = function(enable) {
     if(IRewriter.checkboxElement) {
         IRewriter.checkboxElement.checked = enable;
     }
-    setCookie(IRewriter.prefix+'-enabled', cookieValue);
+    setCookie(IRewriter.prefix+'enabled', cookieValue);
 }
 
 // stop propagation of given event
@@ -324,22 +356,27 @@ function tiKeyDown(event) {
  * This is the function to which call during window load event for trasliterating textfields.
  * The funtion will accept any number of HTML tag IDs of textfields.
 */
-function inputRewrite(tagName) {
-    var elements = document.getElementsByTagName(tagName);
+function inputRewrite(elements) {
     var len = elements.length;
     for(var i=0;i<len; i++)
     {
         var element = elements[i];
-        // filter out non text inputs
-        //if(element && tagName == 'input' && element.type != 'text') break;
+        // if given element has no id set
+        // we assing a temporary value
         if(element.id ==undefined || element.id.length == 0) {
             element.id = 'irtempid-'+IRewriter.id;
             IRewriter.id = IRewriter.id + 1;
         }
         if(element)
         {
-            //IRewriter.enabled  = IRewriter.default_state;
-            IRewriter.previous_sequence[element.id] = '';
+            IRewriter.elements.push(element);
+            if(element.style && IRewriter.enabled) {
+                IRewriter.elementBorders[element.id] = element.style.border;
+                element.style.border = IRewriter.border;
+                IRewriter.elementBackColors[element.id] = element.style.backgroundColor;
+                element.style.backgroundColor = IRewriter.back_color
+                IRewriter.previous_sequence[element.id] = '';
+            }
             if (element.addEventListener){
                 element.addEventListener('keydown', tiKeyDown, false);
                 element.addEventListener('keypress', tiKeyPressed, false);
@@ -370,7 +407,7 @@ function writingStyleLBChanged(event) {
     var e = event || window.event;
     var listBox =  (e.currentTarget || e.srcElement);
     IRewriter.current_scheme = IRewriter.schemes[listBox.selectedIndex];
-    setCookie(IRewriter.prefix+'-default-index', listBox.selectedIndex);
+    setCookie(IRewriter.prefix+'default-index', listBox.selectedIndex);
 }
 
 // IRewriter setup and initialization code
@@ -378,7 +415,9 @@ IRewriter.shortcut = {};
 IRewriter.checkbox = {};
 // memory for previus key sequence
 IRewriter.previous_sequence = {};
-
+IRewriter.elements = [];
+IRewriter.elementBorders = {};
+IRewriter.elementBackColors = {};
 // To generate ids for elements that have no id assigned
 IRewriter.id = 0;
 
@@ -397,16 +436,17 @@ IRewriter.shortcut.toString = function() {
  * This functions is to synchronize IRewriter state from cookie
  */
 IRewriter.translitStateSynWithCookie = function() {
-    var state = parseInt(readCookie(IRewriter.prefix+'-enabled' ));
+    var state = parseInt(readCookie(IRewriter.prefix+'enabled' ));
     var enable = IRewriter.enabled;
     if(state == 1)  enable=true;
     else if(state==0) enable =false;
     IRewriter.enableTrasliteration(enable);
-    var schemeIndex = parseInt(readCookie(IRewriter.prefix+'-default-index'))
+    var schemeIndex = parseInt(readCookie(IRewriter.prefix+'default-index'));
     if(schemeIndex > 0 && schemeIndex < IRewriter.schemes.length) {
         IRewriter.listBox.selectedIndex = schemeIndex;
     }
     else IRewriter.listBox.selectedIndex = IRewriter.default_scheme_index;
+    IRewriter.current_scheme = IRewriter.schemes[IRewriter.listBox.selectedIndex];
 }
 /* Settings */
 IRewriter.shortcut = {
@@ -436,6 +476,8 @@ IRewriter.default_scheme_index = 0; // eg: 0
 IRewriter.enabled = true;
 IRewriter.prefix = 'irewriter-';
 IRewriter.check_str_length = 6;
+IRewriter.back_color = '#FDFDCD';
+IRewriter.border = '2px inset #FDBBBB';
 
 IRewriter.init = function() {
     IRewriter.current_scheme = IRewriter.schemes[IRewriter.default_scheme_index];
