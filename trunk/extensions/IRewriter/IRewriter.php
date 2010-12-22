@@ -14,13 +14,12 @@
  *
  *      After above line configure its working using these settings
  *
- *              $wgIRewriterConfig['shortcut_controlkey'] = false;
+ *              $wgIRewriterConfig['shortcut_controlkey'] = true;
  *              $wgIRewriterConfig['shortcut_altkey'] = false;
  *              $wgIRewriterConfig['shortcut_shiftkey'] = false;
  *              $wgIRewriterConfig['shortcut_metakey'] = false;
  *              $wgIRewriterConfig['shortcut_key'] = 'M';
- *              $wgIRewriterConfig['default_state'] = true;
- *              $wgIRewriterConfig['schemes'] = array('ml', 'ta99', 'ml_inscript');
+ *              $wgIRewriterConfig['schemes'] = array('ml', 'ml_inscript');
  *              $wgIRewriterConfig['default_scheme_index'] = 0;
  *              $wgIRewriterConfig['enabled'] = true;
  *
@@ -47,12 +46,12 @@ $wgExtensionCredits['other'][] = array(
     'description' => 'Allows to add custom input methods for input fields.'
 );
 
-$wgIRewriterConfig['shortcut_controlkey'] = false;
+$wgIRewriterConfig['shortcut_controlkey'] = true;
 $wgIRewriterConfig['shortcut_altkey'] = false;
 $wgIRewriterConfig['shortcut_shiftkey'] = false;
 $wgIRewriterConfig['shortcut_metakey'] = false;
 $wgIRewriterConfig['shortcut_key'] = 'M';
-$wgIRewriterConfig['default_state'] = true;
+//$wgIRewriterConfig['default_state'] = true;
 $wgIRewriterConfig['schemes'] = array('ml', 'ta99', 'ml_inscript');
 $wgIRewriterConfig['default_scheme_index'] = 0;
 $wgIRewriterConfig['enabled'] = true;
@@ -154,7 +153,7 @@ class IRewriter {
         $title = Title::newFromText(wfMsgForContent('irewriter-help-page'));
         $str .= sprintf("IRewriter.checkbox.href= '%s';\n", $title->getFullURL());
         $str .= sprintf("IRewriter.checkbox.tooltip= '%s';\n", wfMsgForContent('irewriter-checkbox-tooltip'));
-        $str .= 'IRewriter.default_state = ' . IRewriter::boolToString($wgIRewriterConfig['default_state']) . ";\n";
+        //$str .= 'IRewriter.default_state = ' . IRewriter::boolToString($wgIRewriterConfig['default_state']) . ";\n";
         $str .= "IRewriter.schemes = [\n";
         $schemeCount = count($wgIRewriterConfig['schemes']);
         for ($i = 0; $i < $schemeCount; $i++) {
