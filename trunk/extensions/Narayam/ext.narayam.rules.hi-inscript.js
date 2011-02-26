@@ -114,9 +114,10 @@ var rules_x = [
 ['\\$', '', '\u20B9']
 ];
 
-jQuery.narayam.addScheme( 'si', {
+jQuery.narayam.addScheme( 'hi', {
     'namemsg': 'narayam-hi-inscript',
     'extended_keyboard': false,
     'lookbackLength': 0,
-    'rules': rules
+    'rules': rules,
+    'rules_x': rules_x
 } ); 
