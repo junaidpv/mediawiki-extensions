@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Transliteration regular expression rules table for Sinhala (Singlish)
  * @author Junaid P V ([[user:Junaidpv]])
  * @date 2011-02-23
@@ -35,7 +35,7 @@ var rules = [
 ['i', '', 'ඉ'],
 ];
 
-jQuery.narayam.addScheme( 'si', {
+jQuery.narayam.addScheme( 'si-singlish', {
     'namemsg': 'narayam-si-singlish',
     'extended_keyboard': false,
     'lookbackLength': 2,

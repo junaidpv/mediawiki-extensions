@@ -73,7 +73,7 @@ var rules = [
 ['\\`', '', '\u200C']
 ];
 
-jQuery.narayam.addScheme( 'bn', {
+jQuery.narayam.addScheme( 'bn-bornona', {
     'namemsg': 'narayam-bn-bornona',
     'extended_keyboard': false,
     'lookbackLength': 0,

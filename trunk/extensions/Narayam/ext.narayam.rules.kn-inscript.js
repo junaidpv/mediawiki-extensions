@@ -106,7 +106,7 @@ var rules_x = [
 ['\\$', '', '\u20B9']
 ];
 
-jQuery.narayam.addScheme( 'kn', {
+jQuery.narayam.addScheme( 'kn-inscript', {
     'namemsg': 'narayam-kn-inscript',
     'extended_keyboard': true,
     'lookbackLength': 0,
