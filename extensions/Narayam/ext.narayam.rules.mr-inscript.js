@@ -111,9 +111,9 @@ var rules_x = [
 ['\\$', '', '\u20B9']
 ];
 
-jQuery.narayam.addScheme( 'mr', {
+jQuery.narayam.addScheme( 'mr-inscript', {
     'namemsg': 'narayam-mr-inscript',
-    'extended_keyboard': false,
+    'extended_keyboard': true,
     'lookbackLength': 0,
     'rules': rules,
     'rules_x': rules_x

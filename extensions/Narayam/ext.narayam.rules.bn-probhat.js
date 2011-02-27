@@ -89,7 +89,7 @@ var rules = [
 ['\\*', '', 'ৎ']
 ];
 
-jQuery.narayam.addScheme( 'bn', {
+jQuery.narayam.addScheme( 'bn-probhat', {
     'namemsg': 'narayam-bn-probhat',
     'extended_keyboard': false,
     'lookbackLength': 0,
